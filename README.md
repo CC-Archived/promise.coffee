@@ -14,9 +14,9 @@ It supports foreign promises returned by callbacks as long as they support the s
 
 Create a deferred:
 
-	Deferred = require( 'promise-coffee' ).Deferred;
+	var Deferred = require( 'promise-coffee' ).Deferred;
 	
-	deferred = new Deferred();
+	var deferred = new Deferred();
 
 Resolve that deferred:
 	
@@ -28,7 +28,7 @@ Or, reject that deferred:
 
 Obtain the promise linked to that deferred to pass to external consumers:
 
-	promise = deferred.promise;
+	var promise = deferred.promise;
 
 Add (optional) handlers to that promise:
 
