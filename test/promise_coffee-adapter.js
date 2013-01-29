@@ -1,4 +1,4 @@
-var Deferred = require('../promise-coffee').Deferred;
+var Deferred = require('../promise').Deferred;
 
 exports.pending = function () {
 	var deferred = new Deferred();

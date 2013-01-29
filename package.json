@@ -3,11 +3,11 @@
 	"version": "1.0.0",
 	"description": "Promises/A+ compliant implementation in object-oriented CoffeeScript",
 	"keywords": ["promise", "promises", "async", "asynchronous", "deferred"],
-	"main": "promise-coffee",
+	"main": "./promise.js",
 	"devDependencies": {
 		"promises-aplus-tests": ""
 	},
 	"scripts": {
-		"test": "promises-aplus-tests test/promise-coffee-adapter.js"
+		"test": "promises-aplus-tests test/promise_coffee-adapter.js"
 	}
 }
