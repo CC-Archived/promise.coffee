@@ -1,4 +1,5 @@
-<img src="https://raw.github.com/CodeCatalyst/promise.coffee/master/promise-coffee-logo.png" width="580" height="115">
+<img src="https://raw.github.com/CodeCatalyst/promise.coffee/master/promise_coffee-logo.png" width="580" height="115">
+<a href="https://github.com/promises-aplus/promises-spec"><img src="http://promises-aplus.github.com/promises-spec/assets/logo-small.png" align="right" /></a>
 
 ## About
 
@@ -14,8 +15,6 @@ It supports foreign promises returned by callbacks as long as they support the s
 
 Create a deferred:
 
-	var Deferred = require( 'promise-coffee' ).Deferred;
-	
 	var deferred = new Deferred();
 
 Resolve that deferred:
@@ -33,6 +32,43 @@ Obtain the promise linked to that deferred to pass to external consumers:
 Add (optional) handlers to that promise:
 
 	promise.then( onFulfilled, onRejected );
+
+## Installation
+
+### Node.js
+
+Download, clone or:
+
+	npm install git://github.com/CodeCatalyst/promise.coffee.git
+	
+and then:
+
+	var Deferred = require( 'promise.coffee' ).Deferred;
+
+### AMD:
+
+Assuming you have configured your loader to map the promise.coffee files to the 'promise' module identifier.
+
+	define( function ( require, exports, module ) {
+		var Deferred = require( 'promise' ).Deferred;
+		
+		...
+	});
+
+### &lt;script&gt; tag:
+
+Reference the appropriate script file from your HTML file:
+
+	<script src="promise.js"></script>
+
+or, for the minified version of the script:
+
+	<script src="promise.min.js"></script>
+
+
+or, in the unlikely case you are using the browser-based CoffeeScript compiler:
+
+	<script type="text/coffeescript" src="promise.coffee"></script>
 
 ## Internal Anatomy
 
@@ -79,12 +115,12 @@ Each Deferred has an associated Resolver.  A Deferred delegates `resolve()` and 
 * [Kris Zyp](https://github.com/kriszyp), who proposed the original [Common JS Promises/A Specification](http://wiki.commonjs.org/wiki/Promises/A) and created [node-promise](https://github.com/kriszyp/node-promise) and [promised-io](https://github.com/kriszyp/promised-io),
 * [Domenic Denicola](https://github.com/domenic) for the [Promises/A+ Specification](https://github.com/promises-aplus/promises-spec) and [Promises/A+ Compliance Test Suite](https://github.com/promises-aplus/promises-tests), and for his work with:
 * [Kris Kowal](https://github.com/kriskowal), who created [q](https://github.com/kriskowal/q), a JavaScript promise library that pioneered many of the practices now codified in the [Promises/A+ Specification](https://github.com/promises-aplus/promises-spec),
-* and [Brian Cavalier](https://github.com/briancavalier) for his contributions to the [Promises/A+ Specification](https://github.com/promises-aplus/promises-spec) and [Promises/A+ Compliance Test Suite](https://github.com/promises-aplus/promises-tests), and the inspiration that [avow.js](https://github.com/briancavalier/avow) and [when.js](https://github.com/cujojs/when) (with [John Hann](https://github.com/unscriptable)) and [past GitHub issue discussions](https://github.com/cujojs/when/issues/60) have provided;
-*  and [Jason Barry](http://dribbble.com/artifactdesign), who designed the promise.coffee logo.
+* [Brian Cavalier](https://github.com/briancavalier) for his contributions to the [Promises/A+ Specification](https://github.com/promises-aplus/promises-spec) and [Promises/A+ Compliance Test Suite](https://github.com/promises-aplus/promises-tests), and the inspiration that [avow.js](https://github.com/briancavalier/avow) and [when.js](https://github.com/cujojs/when) (with [John Hann](https://github.com/unscriptable)) and [past GitHub issue discussions](https://github.com/cujojs/when/issues/60) have provided; and
+* [Jason Barry](http://dribbble.com/artifactdesign), who designed the promise.coffee logo.
 
 ## License
 
-Copyright (c) 2012 [CodeCatalyst, LLC](http://www.codecatalyst.com/)
+Copyright (c) 2012-2013 [CodeCatalyst, LLC](http://www.codecatalyst.com/)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
