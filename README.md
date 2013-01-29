@@ -39,7 +39,7 @@ Add (optional) handlers to that promise:
 
 Download, clone or:
 
-	npm install git://github.com/CodeCatalyst/promise.coffee.git
+	npm install promise.coffee
 	
 and then:
 
