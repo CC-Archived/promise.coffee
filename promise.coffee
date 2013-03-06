@@ -2,7 +2,7 @@
 # Copyright (c) 2012-2103 [CodeCatalyst, LLC](http://www.codecatalyst.com/).
 # Open source under the [MIT License](http://en.wikipedia.org/wiki/MIT_License).
 
-nextTick = process?.nextTick or setImmediate or ( task ) -> setTimeout( task, 0 )
+nextTick = if process?.nextTick? then process.nextTick else if setImmediate? then setImmediate else ( task ) -> setTimeout( task, 0 )
 
 isFunction = ( value ) -> typeof value is 'function'
 

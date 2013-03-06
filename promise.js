@@ -7,7 +7,7 @@
 (function() {
   var Deferred, Promise, Resolver, isFunction, nextTick, target;
 
-  nextTick = (typeof process !== "undefined" && process !== null ? process.nextTick : void 0) || setImmediate || function(task) {
+  nextTick = (typeof process !== "undefined" && process !== null ? process.nextTick : void 0) != null ? process.nextTick : typeof setImmediate !== "undefined" && setImmediate !== null ? setImmediate : function(task) {
     return setTimeout(task, 0);
   };
 
