@@ -1,8 +1,8 @@
-# [promise.coffee](http://github.com/CodeCatalyst/promise.coffee) v1.0
+# [promise.coffee](http://github.com/CodeCatalyst/promise.coffee) v1.0.1
 # Copyright (c) 2012-2103 [CodeCatalyst, LLC](http://www.codecatalyst.com/).
 # Open source under the [MIT License](http://en.wikipedia.org/wiki/MIT_License).
 
-nextTick = process?.nextTick or setImmediate? or ( task ) -> setTimeout( task, 0 )
+nextTick = process?.nextTick or setImmediate or ( task ) -> setTimeout( task, 0 )
 
 isFunction = ( value ) -> typeof value is 'function'
 
