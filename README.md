@@ -1,6 +1,8 @@
 <img src="https://raw.github.com/CodeCatalyst/promise.coffee/master/promise_coffee-logo.png" width="580" height="115">
 <a href="http://promisesaplus.com/"><img src="http://promisesaplus.com/assets/logo-small.png" alt="Promises/A+ logo" title="Promises/A+ 1.1 compliant" align="right" /></a>
 
+[![Build Status](https://travis-ci.org/CodeCatalyst/promise.coffee.png?branch=master)](https://travis-ci.org/CodeCatalyst/promise.coffee)
+
 ## About
 
 promise.coffee is an ultra-lean (~100 lines) object-oriented [CoffeeScript](http://coffeescript.org/) implementation of the [Promises/A+ Specification](https://github.com/promises-aplus/promises-spec) that passes the [Promises/A+ Compliance Test Suite](https://github.com/promises-aplus/promises-tests).
