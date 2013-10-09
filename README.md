@@ -1,9 +1,9 @@
 <img src="https://raw.github.com/CodeCatalyst/promise.coffee/master/promise_coffee-logo.png" width="580" height="115">
-<a href="https://github.com/promises-aplus/promises-spec"><img src="http://promises-aplus.github.com/promises-spec/assets/logo-small.png" align="right" /></a>
+<a href="http://promisesaplus.com/"><img src="http://promisesaplus.com/assets/logo-small.png" alt="Promises/A+ logo" title="Promises/A+ 1.1 compliant" align="right" /></a>
 
 ## About
 
-promise.coffee is an ultra-lean (~80 lines) object-oriented [CoffeeScript](http://coffeescript.org/) implementation of the [Promises/A+ Specification](https://github.com/promises-aplus/promises-spec) that passes the [Promises/A+ Compliance Test Suite](https://github.com/promises-aplus/promises-tests).
+promise.coffee is an ultra-lean (~100 lines) object-oriented [CoffeeScript](http://coffeescript.org/) implementation of the [Promises/A+ Specification](https://github.com/promises-aplus/promises-spec) that passes the [Promises/A+ Compliance Test Suite](https://github.com/promises-aplus/promises-tests).
 
 Inspired by [avow.js](https://github.com/briancavalier/avow), promise.coffee differs by providing a reference implementation that decomposes Promise/A+ functionality into object-oriented classes.  The approach demonstrated here offers a model for how Promises might be implemented in stricter class oriented languages.
 
@@ -78,7 +78,7 @@ This implementation decomposes Promise functionality into three classes:
 
 Promises represent a future value; i.e., a value that may not yet be available.
 
-A Promise's `then()` method is used to specify `onFulfilled` and `onRejected` callbacks that will be notified when the future value becomes available.  Those callbacks can subsequently transform the value that was resolved or the reason that was rejected.  Each call to `then()` returns a new Promise of that transformed value; i.e., a Promise that is resolved with the callback return value or rejected with any error thrown by the callback.
+A Promise's `then()` method is used to specify `onFulfilled` and `onRejected` callbacks that will be notified when the future value becomes available.  Those callbacks can subsequently transform the value that was fulfilled or the reason that was rejected.  Each call to `then()` returns a new Promise of that transformed value; i.e., a Promise that is fulfilled with the callback return value or rejected with any error thrown by the callback.
 
 ### Deferred
 
@@ -94,7 +94,7 @@ Resolvers are used internally by Deferreds and Promises to capture and notify ca
 
 Developers never directly interact with a Resolver.
 
-A Resolver captures a pair of optional `onResolved` and `onRejected` callbacks and has an associated Promise.  That Promise delegates its `then()` calls to the Resolver's `then()` method, which creates a new Resolver and schedules its delayed addition as a chained Resolver.
+A Resolver captures a pair of optional `onResolved` and `onRejected` callbacks and has an associated Promise.  That Promise delegates its `then()` calls to the Resolver's `then()` method, which creates a new chained Resolver.
 
 Each Deferred has an associated Resolver.  A Deferred delegates `resolve()` and `reject()` calls to that Resolver's `resolve()` and `reject()` methods.  The Resolver processes the resolution value and rejection reason, and propagates the processed resolution value or rejection reason to any chained Resolvers it may have created in response to `then()` calls.  Once a chained Resolver has been notified, it is cleared out of the set of chained Resolvers and will not be notified again.
 

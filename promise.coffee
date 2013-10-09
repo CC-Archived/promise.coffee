@@ -1,14 +1,15 @@
-# [promise.coffee](http://github.com/CodeCatalyst/promise.coffee) v1.0.1
+# [promise.coffee](http://github.com/CodeCatalyst/promise.coffee) v1.0.2
 # Copyright (c) 2012-2103 [CodeCatalyst, LLC](http://www.codecatalyst.com/).
 # Open source under the [MIT License](http://en.wikipedia.org/wiki/MIT_License).
 
 nextTick = if process?.nextTick? then process.nextTick else if setImmediate? then setImmediate else ( task ) -> setTimeout( task, 0 )
 
 isFunction = ( value ) -> typeof value is 'function'
+isObject = ( value ) -> value is Object( value )
 
 class Resolver
 	constructor: ( onResolved, onRejected ) ->
-		@promise = new Promise( @ )
+		promise = new Promise( @ )
 		pendingResolvers = []
 		processed = false
 		completed = false
@@ -23,48 +24,67 @@ class Resolver
 				pendingResolver[ completionAction ]( completionValue )
 			pendingResolvers = []
 			return
-		schedule = ( pendingResolver ) ->
-			pendingResolvers.push( pendingResolver )
-			propagate() if completed
-			return
 		complete = ( action, value ) ->
 			onResolved = onRejected = null
 			completionAction = action
 			completionValue = value
 			completed = true
-			propagate()
+			nextTick( -> propagate() ) if pendingResolvers.length > 0
 			return
 		completeResolved = ( result ) -> 
-			complete( 'resolve', result )
+			complete( 'resolve', result ) if not completed
 			return
 		completeRejected = ( reason ) -> 
-			complete( 'reject', reason )
+			complete( 'reject', reason ) if not completed
 			return
-		
-		process = ( callback, value ) ->
-			processed = true
+		resolve = ( value ) ->
 			try
-				value = callback( value ) if isFunction( callback )
-				if value and isFunction( value.then )
-					value.then( completeResolved, completeRejected )
+				if value is promise
+					throw new TypeError('A Promise cannot be resolved with itself.')
+				if isObject( value ) or isFunction( value )
+					thenFn = value.then
+					if isFunction( thenFn )
+						try
+							resolver = new Resolver( resolve, completeRejected)
+							thenFn.call( value, resolver.resolve, resolver.reject )
+						catch error
+							resolver.reject( error )
+					else
+						completeResolved( value )
 				else
 					completeResolved( value )
 			catch error
 				completeRejected( error )
 			return
+		process = ( value, callback ) ->
+			processed = true
+			if callback?
+				nextTick( ->
+					try
+						value = callback( value ) if isFunction( callback )
+						resolve( value )
+					catch error
+						completeRejected( error )
+					return
+				)
+			else
+				resolve( value )
+			return
 		
 		@resolve = ( result ) ->
-			process( onResolved, result ) if not processed
+			process( result, onResolved ) if not processed
 			return
-		@reject = ( error ) ->
-			process( onRejected, error ) if not processed
+		@reject = ( reason ) ->
+			process( reason, onRejected ) if not processed
 			return 
 		@then = ( onResolved, onRejected ) ->
 			if isFunction( onResolved ) or isFunction( onRejected )
 				pendingResolver = new Resolver( onResolved, onRejected )
-				nextTick( -> schedule( pendingResolver ) )
+				pendingResolvers.push( pendingResolver )
+				nextTick( -> propagate() ) if completed
 				return pendingResolver.promise
-			return @promise
+			return promise
+		@promise = promise
 
 class Promise
 	constructor: ( resolver ) ->

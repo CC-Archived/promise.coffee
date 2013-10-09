@@ -1,8 +1,8 @@
 {
 	"name": "promise.coffee",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Promises/A+ compliant implementation in object-oriented CoffeeScript",
-	"keywords": ["promise", "promises", "async", "asynchronous", "deferred"],
+	"keywords": ["promise", "promises", "promises-aplus", "async", "asynchronous", "deferred"],
 	"author": "John Yanarella <jmy@codecatalyst.com> (http://codecatalyst.com)",
 	"license": "MIT",
 	"repository": {
@@ -14,9 +14,9 @@
 	},
 	"main": "./promise.js",
 	"devDependencies": {
-		"coffee-script": ">= 1.4.0",
-		"promises-aplus-tests": "",
-		"jshint": ">= 0.9.1"
+		"coffee-script": ">= 1.6.3",
+		"promises-aplus-tests": "*",
+		"jshint": "~1"
 	},
 	"scripts": {
 		"test": "promises-aplus-tests test/promise_coffee-adapter.js",
