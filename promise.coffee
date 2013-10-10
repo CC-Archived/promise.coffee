@@ -1,8 +1,25 @@
-# [promise.coffee](http://github.com/CodeCatalyst/promise.coffee) v1.0.2
+# [promise.coffee](http://github.com/CodeCatalyst/promise.coffee) v1.0.3
 # Copyright (c) 2012-2103 [CodeCatalyst, LLC](http://www.codecatalyst.com/).
 # Open source under the [MIT License](http://en.wikipedia.org/wiki/MIT_License).
 
 nextTick = if process?.nextTick? then process.nextTick else if setImmediate? then setImmediate else ( task ) -> setTimeout( task, 0 )
+
+class CallbackQueue
+	constructor: ->
+		queuedCallbacks = []
+		execute = ->
+			index = 0
+			while index < queuedCallbacks.length
+				queuedCallbacks[ index++ ]()
+			queuedCallbacks.length = 0
+			return
+		@schedule = ( callback ) ->
+			if queuedCallbacks.push( callback ) is 1
+				nextTick( execute )
+				return
+
+callbackQueue = new CallbackQueue()
+enqueue = ( task ) -> callbackQueue.schedule( task )
 
 isFunction = ( value ) -> typeof value is 'function'
 isObject = ( value ) -> value is Object( value )
@@ -22,14 +39,14 @@ class Resolver
 		propagate = ->
 			for pendingResolver in pendingResolvers
 				pendingResolver[ completionAction ]( completionValue )
-			pendingResolvers = []
+			pendingResolvers.length = 0
 			return
 		complete = ( action, value ) ->
 			onResolved = onRejected = null
 			completionAction = action
 			completionValue = value
 			completed = true
-			nextTick( -> propagate() ) if pendingResolvers.length > 0
+			enqueue( propagate ) if pendingResolvers.length > 0
 			return
 		completeResolved = ( result ) -> 
 			complete( 'resolve', result ) if not completed
@@ -41,16 +58,12 @@ class Resolver
 			try
 				if value is promise
 					throw new TypeError('A Promise cannot be resolved with itself.')
-				if isObject( value ) or isFunction( value )
-					thenFn = value.then
-					if isFunction( thenFn )
-						try
-							resolver = new Resolver( resolve, completeRejected)
-							thenFn.call( value, resolver.resolve, resolver.reject )
-						catch error
-							resolver.reject( error )
-					else
-						completeResolved( value )
+				if ( isObject( value ) or isFunction( value ) ) and isFunction( thenFn = value.then )
+					try
+						resolver = new Resolver( resolve, completeRejected)
+						thenFn.call( value, resolver.resolve, resolver.reject )
+					catch error
+						resolver.reject( error )
 				else
 					completeResolved( value )
 			catch error
@@ -59,7 +72,7 @@ class Resolver
 		process = ( value, callback ) ->
 			processed = true
 			if callback?
-				nextTick( ->
+				enqueue( ->
 					try
 						value = callback( value ) if isFunction( callback )
 						resolve( value )
@@ -81,7 +94,7 @@ class Resolver
 			if isFunction( onResolved ) or isFunction( onRejected )
 				pendingResolver = new Resolver( onResolved, onRejected )
 				pendingResolvers.push( pendingResolver )
-				nextTick( -> propagate() ) if completed
+				enqueue( propagate ) if completed
 				return pendingResolver.promise
 			return promise
 		@promise = promise

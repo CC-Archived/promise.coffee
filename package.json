@@ -1,6 +1,6 @@
 {
 	"name": "promise.coffee",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "Promises/A+ compliant implementation in object-oriented CoffeeScript",
 	"keywords": ["promise", "promises", "promises-aplus", "async", "asynchronous", "deferred"],
 	"author": "John Yanarella <jmy@codecatalyst.com> (http://codecatalyst.com)",
