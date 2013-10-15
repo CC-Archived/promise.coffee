@@ -1,4 +1,4 @@
-# [promise.coffee](http://github.com/CodeCatalyst/promise.coffee) v1.0.3
+# [promise.coffee](http://github.com/CodeCatalyst/promise.coffee) v1.0.4
 # Copyright (c) 2012-2103 [CodeCatalyst, LLC](http://www.codecatalyst.com/).
 # Open source under the [MIT License](http://en.wikipedia.org/wiki/MIT_License).
 
@@ -6,98 +6,108 @@ nextTick = if process?.nextTick? then process.nextTick else if setImmediate? the
 
 class CallbackQueue
 	constructor: ->
-		queuedCallbacks = []
+		queuedCallbacks = new Array(1e4)
+		queuedCallbackCount = 0
 		execute = ->
 			index = 0
-			while index < queuedCallbacks.length
-				queuedCallbacks[ index++ ]()
-			queuedCallbacks.length = 0
+			while index < queuedCallbackCount
+				queuedCallbacks[ index ]()
+				queuedCallbacks[ index ] = null
+				index++
+			queuedCallbackCount = 0
 			return
 		@schedule = ( callback ) ->
-			if queuedCallbacks.push( callback ) is 1
-				nextTick( execute )
-				return
+			queuedCallbacks[ queuedCallbackCount++ ] = callback
+			nextTick( execute ) if queuedCallbackCount is 1
+			return
 
 callbackQueue = new CallbackQueue()
 enqueue = ( task ) -> callbackQueue.schedule( task )
 
-isFunction = ( value ) -> typeof value is 'function'
-isObject = ( value ) -> value is Object( value )
+isFunction = ( value ) -> value and typeof value is 'function'
+isObject = ( value ) -> value and typeof value is 'object'
+
+class Consequence
+	constructor: ( @resolve, @reject ) ->
+		@resolver = new Resolver()
+		@promise = @resolver.promise
+	
+	trigger: ( action, value ) ->
+		resolver = @resolver
+		callback = @[ action ]
+		if isFunction( callback )
+			enqueue( ->
+				try
+					resolver.resolve( callback( value ) )
+				catch error
+					resolver.reject( error )
+				return
+			)
+		else
+			resolver[ action ]( value )
+		return
 
 class Resolver
-	constructor: ( onResolved, onRejected ) ->
-		promise = new Promise( @ )
-		pendingResolvers = []
-		processed = false
-		completed = false
-		completionValue = null
-		completionAction = null
-		
-		if not isFunction( onRejected )
-			onRejected = ( error ) -> throw error
-		
-		propagate = ->
-			for pendingResolver in pendingResolvers
-				pendingResolver[ completionAction ]( completionValue )
-			pendingResolvers.length = 0
+	constructor: ->
+		@promise = new Promise( @ )
+		@consequences = []
+		@completed = false
+		@completionAction = null
+		@completionValue = null
+	
+	then: ( onFulfilled, onRejected ) ->
+		consequence = new Consequence( onFulfilled, onRejected )
+		if @completed
+			consequence.trigger( @completionAction, @completionValue )
+		else
+			@consequences.push( consequence )
+		return consequence.promise
+	
+	resolve: ( value ) ->
+		if @completed
 			return
-		complete = ( action, value ) ->
-			onResolved = onRejected = null
-			completionAction = action
-			completionValue = value
-			completed = true
-			enqueue( propagate ) if pendingResolvers.length > 0
-			return
-		completeResolved = ( result ) -> 
-			complete( 'resolve', result ) if not completed
-			return
-		completeRejected = ( reason ) -> 
-			complete( 'reject', reason ) if not completed
-			return
-		resolve = ( value ) ->
-			try
-				if value is promise
-					throw new TypeError('A Promise cannot be resolved with itself.')
-				if ( isObject( value ) or isFunction( value ) ) and isFunction( thenFn = value.then )
-					try
-						resolver = new Resolver( resolve, completeRejected)
-						thenFn.call( value, resolver.resolve, resolver.reject )
-					catch error
-						resolver.reject( error )
-				else
-					completeResolved( value )
-			catch error
-				completeRejected( error )
-			return
-		process = ( value, callback ) ->
-			processed = true
-			if callback?
-				enqueue( ->
-					try
-						value = callback( value ) if isFunction( callback )
-						resolve( value )
-					catch error
-						completeRejected( error )
-					return
-				)
+		try
+			if value is @promise
+				throw new TypeError( 'A Promise cannot be resolved with itself.' )
+			if ( isObject( value ) or isFunction( value ) ) and isFunction( thenFn = value.then )
+				isHandled = false
+				try
+					self = @
+					thenFn.call(
+						value
+						( value ) ->
+							if not isHandled
+								isHandled = true
+								self.resolve( value )
+							return
+						( error ) ->
+							if not isHandled
+								isHandled = true
+								self.reject( error )
+							return
+					)
+				catch error
+					@reject( error ) if not isHandled
 			else
-				resolve( value )
+				@complete( 'resolve', value )
+		catch error
+			@reject( error )
+		return
+	
+	reject: ( error ) ->
+		if @completed
 			return
-		
-		@resolve = ( result ) ->
-			process( result, onResolved ) if not processed
-			return
-		@reject = ( reason ) ->
-			process( reason, onRejected ) if not processed
-			return 
-		@then = ( onResolved, onRejected ) ->
-			if isFunction( onResolved ) or isFunction( onRejected )
-				pendingResolver = new Resolver( onResolved, onRejected )
-				pendingResolvers.push( pendingResolver )
-				enqueue( propagate ) if completed
-				return pendingResolver.promise
-			return promise
-		@promise = promise
+		@complete( 'reject', error )
+		return
+	
+	complete: ( action, value ) ->
+		@completionAction = action
+		@completionValue = value
+		@completed = true
+		for consequence in @consequences
+			consequence.trigger( @completionAction, @completionValue )
+		@consequences = null
+		return
 
 class Promise
 	constructor: ( resolver ) ->
@@ -108,7 +118,7 @@ class Deferred
 		resolver = new Resolver()
 		
 		@promise = resolver.promise
-		@resolve = ( result ) -> resolver.resolve( result )
+		@resolve = ( value ) -> resolver.resolve( value )
 		@reject = ( error ) -> resolver.reject( error )
 
 target = exports ? window

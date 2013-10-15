@@ -74,7 +74,7 @@ or, in the unlikely case you are using the browser-based CoffeeScript compiler:
 
 ## Internal Anatomy
 
-This implementation decomposes Promise functionality into three classes:
+This implementation decomposes Promise functionality into four classes:
 
 ### Promise
 
@@ -86,19 +86,35 @@ A Promise's `then()` method is used to specify `onFulfilled` and `onRejected` ca
 
 A Deferred is typically used within the body of a function that performs an asynchronous operation.  When that operation succeeds, the Deferred should be resolved; if that operation fails, the Deferred should be rejected.
 
-Once a Deferred has been resolved or rejected, it is considered to be complete and subsequent calls to `resolve()` or `reject()` are ignored.
+A Deferred is resolved by calling its `resolve()` method with an optional value, and is rejected by calling its `reject()` method with an optional reason.  Once a Deferred has been fulfilled or rejected, it is considered to be complete and subsequent calls to `resolve()` or `reject()` are ignored.
 
 Deferreds are the mechanism used to create new Promises.  A Deferred has a single associated Promise that can be safely returned to external consumers to ensure they do not interfere with the resolution or rejection of the deferred operation.
 
 ### Resolver
 
-Resolvers are used internally by Deferreds and Promises to capture and notify callbacks, process callback return values and propagate resolution or rejection to chained Resolvers.
+Resolvers are used internally by Deferreds to create, resolve and reject Promises, and to propagate fulfillment and rejection.
 
 Developers never directly interact with a Resolver.
 
-A Resolver captures a pair of optional `onResolved` and `onRejected` callbacks and has an associated Promise.  That Promise delegates its `then()` calls to the Resolver's `then()` method, which creates a new chained Resolver.
+Each Deferred has an associated Resolver, and each Resolver has an associated Promise.  A Deferred delegates `resolve()` and `reject()` calls to its Resolver's `resolve()` and `reject()` methods.  A Promise delegates `then()` calls to its Resolver's `then()` method.  In this way, access to Resolver operations are divided between producer (Deferred) and consumer (Promise) roles.
 
-Each Deferred has an associated Resolver.  A Deferred delegates `resolve()` and `reject()` calls to that Resolver's `resolve()` and `reject()` methods.  The Resolver processes the resolution value and rejection reason, and propagates the processed resolution value or rejection reason to any chained Resolvers it may have created in response to `then()` calls.  Once a chained Resolver has been notified, it is cleared out of the set of chained Resolvers and will not be notified again.
+When a Resolver's `resolve()` method is called, it fulfills with the optionally specified value.  If `resolve()` is called with a then-able (i.e. a Function or Object with a `then()` function, such as another Promise) it assimilates the then-able's result; the Resolver provides its own `resolve()` and `reject()` methods as the `onFulfilled` or `onRejected` arguments in a call to that then-able's `then()` function.  If an error is thrown while calling the then-able's `then()` function (prior to any call back to the specified `resolve()` or `reject()` methods), the Resolver rejects with that error.  If a Resolver's `resolve()` method is called with its own Promise, it rejects with a `TypeError`.
+
+When a Resolver's `reject()` method is called, it rejects with the optionally specified reason.
+
+Each time a Resolver's `then()` method is called, it captures a pair of optional `onFulfilled` and `onRejected` callbacks and returns a Promise of the Resolver's future value as transformed by those callbacks.
+
+### Consequence
+
+Consequences are used internally by Resolvers to capture and notify callbacks, and propagate their results as resolutions or rejections.
+
+Developers never directly interact with a Consequence.
+
+A Consequence forms a chain between two Resolvers, where the result of the first Resolver is transformed by callbacks before being applied to the second Resolver.
+
+Each time a Resolver's `then()` method is called, it creates a new Consequence that will be triggered once the Resolver has been fulfilled or rejected.  A Consequence captures a pair of optional `onFulfilled` and `onRejected` callbacks. 
+
+Each Consequence has its own Resolver (which in turn has a Promise) that is resolved or rejected when the Consequence is triggered.  When a Consequence is triggered by a Resolver, it calls the corresponding callback and propagates the transformed result to its own Resolver; resolved with the callback return value or rejected with any error thrown by the callback.
 
 ## Running the Promises/A+ Test Suite
 
@@ -118,6 +134,7 @@ Each Deferred has an associated Resolver.  A Deferred delegates `resolve()` and 
 * [Domenic Denicola](https://github.com/domenic) for the [Promises/A+ Specification](https://github.com/promises-aplus/promises-spec) and [Promises/A+ Compliance Test Suite](https://github.com/promises-aplus/promises-tests), and for his work with:
 * [Kris Kowal](https://github.com/kriskowal), who created [q](https://github.com/kriskowal/q), a JavaScript promise library that pioneered many of the practices now codified in the [Promises/A+ Specification](https://github.com/promises-aplus/promises-spec),
 * [Brian Cavalier](https://github.com/briancavalier) for his contributions to the [Promises/A+ Specification](https://github.com/promises-aplus/promises-spec) and [Promises/A+ Compliance Test Suite](https://github.com/promises-aplus/promises-tests), and the inspiration that [avow.js](https://github.com/briancavalier/avow) and [when.js](https://github.com/cujojs/when) (with [John Hann](https://github.com/unscriptable)) and [past GitHub issue discussions](https://github.com/cujojs/when/issues/60) have provided; and
+* [Yehor Lvivski](http://lvivski.com/), whose [Davy Jones](https://github.com/lvivski/davy) Promises/A+ implementation and our discussion around optimizing its performance inspired improvements to promise.coffee's implementation; and
 * [Jason Barry](http://dribbble.com/artifactdesign), who designed the promise.coffee logo.
 
 ## License
