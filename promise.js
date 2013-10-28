@@ -62,10 +62,10 @@
 
     Consequence.prototype.trigger = function(action, value) {
       switch (action) {
-        case "fulfill":
+        case 'fulfill':
           this.propagate(value, this.onFulfilled, this.resolver, this.resolver.resolve);
           break;
-        case "reject":
+        case 'reject':
           this.propagate(value, this.onRejected, this.resolver, this.resolver.reject);
       }
     };

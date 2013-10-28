@@ -34,9 +34,9 @@ class Consequence
 	
 	trigger: ( action, value ) ->
 		switch action
-			when "fulfill"
+			when 'fulfill'
 				@propagate( value, @onFulfilled, @resolver, @resolver.resolve )
-			when "reject"
+			when 'reject'
 				@propagate( value, @onRejected, @resolver, @resolver.reject )
 		return
 	
