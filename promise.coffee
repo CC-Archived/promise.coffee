@@ -1,4 +1,4 @@
-# [promise.coffee](http://github.com/CodeCatalyst/promise.coffee) v1.0.4
+# [promise.coffee](http://github.com/CodeCatalyst/promise.coffee) v1.0.5
 # Copyright (c) 2012-2103 [CodeCatalyst, LLC](http://www.codecatalyst.com/).
 # Open source under the [MIT License](http://en.wikipedia.org/wiki/MIT_License).
 
@@ -28,13 +28,19 @@ isFunction = ( value ) -> value and typeof value is 'function'
 isObject = ( value ) -> value and typeof value is 'object'
 
 class Consequence
-	constructor: ( @resolve, @reject ) ->
+	constructor: ( @onFulfilled, @onRejected ) ->
 		@resolver = new Resolver()
 		@promise = @resolver.promise
 	
 	trigger: ( action, value ) ->
-		resolver = @resolver
-		callback = @[ action ]
+		switch action
+			when "fulfill"
+				@propagate( value, @onFulfilled, @resolver, @resolver.resolve )
+			when "reject"
+				@propagate( value, @onRejected, @resolver, @resolver.reject )
+		return
+	
+	propagate: ( value, callback, resolver, resolverMethod ) ->
 		if isFunction( callback )
 			enqueue( ->
 				try
@@ -44,7 +50,7 @@ class Consequence
 				return
 			)
 		else
-			resolver[ action ]( value )
+			resolverMethod.call( resolver, value )
 		return
 
 class Resolver
@@ -89,7 +95,7 @@ class Resolver
 				catch error
 					@reject( error ) if not isHandled
 			else
-				@complete( 'resolve', value )
+				@complete( 'fulfill', value )
 		catch error
 			@reject( error )
 		return

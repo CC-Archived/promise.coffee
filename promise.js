@@ -1,5 +1,5 @@
 /*
- * [promise.coffee](http://github.com/CodeCatalyst/promise.coffee) v1.0.4
+ * [promise.coffee](http://github.com/CodeCatalyst/promise.coffee) v1.0.5
  * Copyright (c) 2012-2013 [CodeCatalyst, LLC](http://www.codecatalyst.com/).
  * Open source under the [MIT License](http://en.wikipedia.org/wiki/MIT_License).
  */
@@ -53,17 +53,24 @@
   };
 
   Consequence = (function() {
-    function Consequence(resolve, reject) {
-      this.resolve = resolve;
-      this.reject = reject;
+    function Consequence(onFulfilled, onRejected) {
+      this.onFulfilled = onFulfilled;
+      this.onRejected = onRejected;
       this.resolver = new Resolver();
       this.promise = this.resolver.promise;
     }
 
     Consequence.prototype.trigger = function(action, value) {
-      var callback, resolver;
-      resolver = this.resolver;
-      callback = this[action];
+      switch (action) {
+        case "fulfill":
+          this.propagate(value, this.onFulfilled, this.resolver, this.resolver.resolve);
+          break;
+        case "reject":
+          this.propagate(value, this.onRejected, this.resolver, this.resolver.reject);
+      }
+    };
+
+    Consequence.prototype.propagate = function(value, callback, resolver, resolverMethod) {
       if (isFunction(callback)) {
         enqueue(function() {
           var error;
@@ -75,7 +82,7 @@
           }
         });
       } else {
-        resolver[action](value);
+        resolverMethod.call(resolver, value);
       }
     };
 
@@ -134,7 +141,7 @@
             }
           }
         } else {
-          this.complete('resolve', value);
+          this.complete('fulfill', value);
         }
       } catch (_error) {
         error = _error;

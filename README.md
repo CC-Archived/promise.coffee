@@ -106,15 +106,15 @@ Each time a Resolver's `then()` method is called, it captures a pair of optional
 
 ### Consequence
 
-Consequences are used internally by Resolvers to capture and notify callbacks, and propagate their results as resolutions or rejections.
+Consequences are used internally by Resolvers to capture and notify callbacks, and propagate their transformed results as fulfillment or rejection.
 
 Developers never directly interact with a Consequence.
 
-A Consequence forms a chain between two Resolvers, where the result of the first Resolver is transformed by callbacks before being applied to the second Resolver.
+A Consequence forms a chain between two Resolvers, where the result of the first Resolver is transformed by the corresponding callback before being applied to the second Resolver.
 
-Each time a Resolver's `then()` method is called, it creates a new Consequence that will be triggered once the Resolver has been fulfilled or rejected.  A Consequence captures a pair of optional `onFulfilled` and `onRejected` callbacks. 
+Each time a Resolver's `then()` method is called, it creates a new Consequence that will be triggered once its originating Resolver has been fulfilled or rejected.  A Consequence captures a pair of optional `onFulfilled` and `onRejected` callbacks. 
 
-Each Consequence has its own Resolver (which in turn has a Promise) that is resolved or rejected when the Consequence is triggered.  When a Consequence is triggered by a Resolver, it calls the corresponding callback and propagates the transformed result to its own Resolver; resolved with the callback return value or rejected with any error thrown by the callback.
+Each Consequence has its own Resolver (which in turn has a Promise) that is resolved or rejected when the Consequence is triggered.  When a Consequence is triggered by its originating Resolver, it calls the corresponding callback and propagates the transformed result to its own Resolver; resolved with the callback return value or rejected with any error thrown by the callback.
 
 ## Running the Promises/A+ Test Suite
 
