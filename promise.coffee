@@ -120,12 +120,14 @@ class Promise
 		@then = ( onFulfilled, onRejected ) -> resolver.then( onFulfilled, onRejected )
 
 class Deferred
-	constructor: ->
+	constructor: (resolveValue) ->
 		resolver = new Resolver()
 		
 		@promise = resolver.promise
 		@resolve = ( value ) -> resolver.resolve( value )
 		@reject = ( error ) -> resolver.reject( error )
+		
+		if typeof resolveValue isnt 'undefined' then @resolve resolveValue
 
 target = exports ? window
 target.Deferred = Deferred
