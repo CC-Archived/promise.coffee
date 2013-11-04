@@ -6,19 +6,13 @@ nextTick = if process?.nextTick? then process.nextTick else if setImmediate? the
 
 class CallbackQueue
   constructor: ->
-    queuedCallbacks = new Array(1e4)
-    queuedCallbackCount = 0
+    queuedCallbacks = []
     execute = ->
-      index = 0
-      while index < queuedCallbackCount
-        queuedCallbacks[ index ]()
-        queuedCallbacks[ index ] = null
-        index++
-      queuedCallbackCount = 0
+      (queuedCallbacks.shift())() while queuedCallbacks.length > 0
       return
     @schedule = ( callback ) ->
-      queuedCallbacks[ queuedCallbackCount++ ] = callback
-      nextTick( execute ) if queuedCallbackCount is 1
+      queuedCallbacks.push(callback)
+      nextTick( execute ) if queuedCallbacks.length is 1
       return
 
 callbackQueue = new CallbackQueue()
