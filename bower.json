@@ -1,0 +1,19 @@
+{
+  "name": "promise.coffee",
+  "version": "1.0.6",
+  "main": "promise.js",
+  "homepage": "https://github.com/CodeCatalyst/promise.coffee",
+  "authors": [
+    "John Yanarella <jmy@codecatalyst.com> (http://codecatalyst.com)"
+  ],
+  "description": "Promises/A+ compliant implementation in object-oriented CoffeeScript",
+  "keywords": [
+    "promise",
+    "promises",
+    "promises-aplus",
+    "async",
+    "asynchronous",
+    "deferred"
+  ],
+  "license": "MIT"
+}
