@@ -1,4 +1,4 @@
-# [promise.coffee](http://github.com/CodeCatalyst/promise.coffee) v1.0.5
+# [promise.coffee](http://github.com/CodeCatalyst/promise.coffee) v1.0.6
 # Copyright (c) 2012-2103 [CodeCatalyst, LLC](http://www.codecatalyst.com/).
 # Open source under the [MIT License](http://en.wikipedia.org/wiki/MIT_License).
 
@@ -100,10 +100,10 @@ class Resolver
 			@reject( error )
 		return
 	
-	reject: ( error ) ->
+	reject: ( reason ) ->
 		if @completed
 			return
-		@complete( 'reject', error )
+		@complete( 'reject', reason )
 		return
 	
 	complete: ( action, value ) ->
@@ -125,7 +125,17 @@ class Deferred
 		
 		@promise = resolver.promise
 		@resolve = ( value ) -> resolver.resolve( value )
-		@reject = ( error ) -> resolver.reject( error )
+		@reject = ( reason ) -> resolver.reject( reason )
+
+	@resolve: ( value ) ->
+		deferred = new Deferred()
+		deferred.resolve( value )
+		return deferred.promise
+	
+	@reject: ( reason ) ->
+		deferred = new Deferred()
+		deferred.reject( reason )
+		return deferred.promise
 
 target = exports ? window
 target.Deferred = Deferred

@@ -1,5 +1,5 @@
 /*
- * [promise.coffee](http://github.com/CodeCatalyst/promise.coffee) v1.0.5
+ * [promise.coffee](http://github.com/CodeCatalyst/promise.coffee) v1.0.6
  * Copyright (c) 2012-2013 [CodeCatalyst, LLC](http://www.codecatalyst.com/).
  * Open source under the [MIT License](http://en.wikipedia.org/wiki/MIT_License).
  */
@@ -149,11 +149,11 @@
       }
     };
 
-    Resolver.prototype.reject = function(error) {
+    Resolver.prototype.reject = function(reason) {
       if (this.completed) {
         return;
       }
-      this.complete('reject', error);
+      this.complete('reject', reason);
     };
 
     Resolver.prototype.complete = function(action, value) {
@@ -192,10 +192,24 @@
       this.resolve = function(value) {
         return resolver.resolve(value);
       };
-      this.reject = function(error) {
-        return resolver.reject(error);
+      this.reject = function(reason) {
+        return resolver.reject(reason);
       };
     }
+
+    Deferred.resolve = function(value) {
+      var deferred;
+      deferred = new Deferred();
+      deferred.resolve(value);
+      return deferred.promise;
+    };
+
+    Deferred.reject = function(reason) {
+      var deferred;
+      deferred = new Deferred();
+      deferred.reject(reason);
+      return deferred.promise;
+    };
 
     return Deferred;
 
