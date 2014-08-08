@@ -75,7 +75,7 @@ class Resolver
 		try
 			if value is @promise
 				throw new TypeError( 'A Promise cannot be resolved with itself.' )
-			if ( isObject( value ) or isFunction( value ) ) and isFunction( thenFn = value.then )
+			if ( isObject( value ) or isFunction( value ) ) and ( isFunction( thenFn = value.then ) or ( value instanceof Deferred and thenFn = value.promise.then ) )
 				isHandled = false
 				try
 					self = @
